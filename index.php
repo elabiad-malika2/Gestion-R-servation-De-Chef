@@ -164,6 +164,46 @@
         </div>
     </footer>
 
-   
+    <script>
+
+document.querySelectorAll('.carousel').forEach(carousel => {
+        const inner = carousel.querySelector('.carousel-inner');
+        const leftBtn = carousel.querySelector('.carousel-btn.left');
+        const rightBtn = carousel.querySelector('.carousel-btn.right');
+        let index = 0;
+
+        // Fonction pour mettre à jour le défilement
+        function updateCarousel() {
+            const offset = -index * 100;
+            inner.style.transform = `translateX(${offset}%)`;
+        }
+
+        // Bouton gauche
+        leftBtn.addEventListener('click', () => {
+            index = (index > 0) ? index - 1 : inner.children.length - 1;
+            updateCarousel();
+        });
+
+        // Bouton droit
+        rightBtn.addEventListener('click', () => {
+            index = (index < inner.children.length - 1) ? index + 1 : 0;
+            updateCarousel();
+        });
+    });
+        const cards = document.querySelectorAll('.card');
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        });
+
+        cards.forEach(card => {
+            observer.observe(card);
+        });
+
+    </script>
 </body>
 </html>
