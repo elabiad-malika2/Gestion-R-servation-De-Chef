@@ -1,0 +1,6 @@
+.heroImage{
+    background-image: url("heroChef.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 60vh;
+}
