@@ -1,3 +1,16 @@
+<?php
+    include "connection.php";
+    session_start();
+    if(isset($_SESSION['id_Login']))
+    {
+        if($_SESSION['role'] == 'user'){
+            header('Location: index.php');
+            exit(); 
+        }
+        } else {
+            header('Location: login.php');
+        }
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,7 +81,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Exemple de ligne -->
+                        
                         <tr class="border-b border-gray-700">
                             <td class="px-4 py-2 text-gray-400">Jean Dupont</td>
                             <td class="px-4 py-2 text-gray-400">2024-12-20</td>

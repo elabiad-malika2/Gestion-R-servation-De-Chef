@@ -1,3 +1,21 @@
+<?php
+    include "connection.php";
+    
+    session_start();
+    if(!isset($_SESSION['id_Login']))
+    {
+        header('Location: login.php');
+        exit();
+    }
+    $userId = $_SESSION['id_Login'];
+    echo "user Id" . $userId ;
+    
+
+    
+    $menu =$conn->query("SELECT * from menu");
+
+
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -95,7 +113,12 @@
                     <li><a href="#" class="hover:text-[#c9ab81]">Accueil</a></li>
                     <li><a href="#" class="hover:text-[#c9ab81]">Menus</a></li>
                     <li><a href="#" class="hover:text-[#c9ab81]">À Propos</a></li>
-                    <li><a href="#" class="hover:text-[#c9ab81]">Réservation</a></li>
+                    <li><a href="reservationC.php" class="hover:text-[#c9ab81]">Réservation</a></li>
+                    <li>
+                        <form action="logout.php" method="post">
+                            <button><img src="img/logout.png" class="h-4 w-4" alt=""></button>
+                        </form>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -104,7 +127,7 @@
 
 
     <!-- Section Hero -->
-    <section class="h-screen" style="background-image: url('heroSection.png'); background-size: cover;">
+    <section class="h-screen" style="background-image: url('img/heroSection.png'); background-size: cover;">
         <div class="flex items-center flex-col  justify-center h-full bg-black bg-opacity-50">
             <div class="text-center flex flex-col gap-3">
                 <h2 class="text-6xl italianno text-[#c9ab81] font-semibold mb-4">Découvrez des saveurs uniques</h2>
@@ -120,42 +143,82 @@
         <div class="container mx-auto px-6">
             <h3 class="text-3xl font-bold text-center mb-10 text-[#c9ab81]">Nos Menus</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Carte 1 -->
-                <div class="card bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                <div class="carousel h-48">
-                    <div class="carousel-inner">
-                        <img src="heroChef.jpg" alt="Plat 1" class="w-full flex-shrink-0">
-                        <img src="heroRES.jpg" alt="Plat 2" class="w-full flex-shrink-0">
-                        <img src="heroSection.png" alt="Plat 3" class="w-full flex-shrink-0">
-                    </div>
-                    <button class="carousel-btn left">&lt;</button>
-                    <button class="carousel-btn right">&gt;</button>
-                </div>
-                <div class="p-6">
-                    <h4 class="font-bold text-xl mb-2 text-[#c9ab81]">Plat Signature</h4>
-                    <p class="text-gray-400">Un plat préparé avec des ingrédients de qualité pour un goût exceptionnel.</p>
-                </div>
-            </div>
+            <?php
+                    foreach ($menu as $m) {
+                        $menuId=$m['id'];
+                        $menuTitre=$m['titre'];
+                        $menuPrix=$m['prix'];
+                        $plats = $conn->query("SELECT * 
+                            FROM plat 
+                            WHERE id IN (
+                                SELECT id_plat 
+                                FROM menuplat 
+                                WHERE id_menu = $menuId
+                            );
+                        ");
+                        echo   "
+                            <div class=' bg-gray-800 rounded-lg shadow-lg overflow-hidden'>
+                                <div class='carousel h-48'>
+                                    <div class='carousel-inner'>
+                                    "; foreach ($plats as $p) {
+                                    
+                                        echo"<img src='".$p['image']."' alt='Plat 1' class='w-full flex-shrink-0'>";
+                                    }
+                                    echo"
+                                    </div>
+                                    <button class='carousel-btn left'>&lt;</button>
+                                    <button class='carousel-btn right'>&gt;</button>
+                                </div>
+                                <div class='p-6'>
+                                    <h4 class='font-bold text-xl mb-2 text-[#c9ab81]'>$menuTitre</h4>
+                                    <p class='text-gray-400'>Prix : $menuPrix</p>
+                                </div>
+                                <button class='bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700' onclick='openModal($menuId)'>
+                                    Réserver
+                                </button>
 
-                <!-- Carte 2 -->
-                <div class="card rounded-lg shadow-lg overflow-hidden">
-                    <img src="https://source.unsplash.com/400x300/?pasta" alt="Pâtes" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h4 class="font-bold text-xl mb-2">Pâtes Gourmandes</h4>
-                        <p class="text-gray-400">Des pâtes fraîches faites maison avec une sauce crémeuse délicieuse.</p>
-                    </div>
-                </div>
-                <!-- Carte 3 -->
-                <div class="card rounded-lg shadow-lg overflow-hidden">
-                    <img src="https://source.unsplash.com/400x300/?dessert" alt="Dessert" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h4 class="font-bold text-xl mb-2">Dessert Royal</h4>
-                        <p class="text-gray-400">Une touche sucrée pour terminer votre repas en beauté.</p>
-                    </div>
-                </div>
+                            </div>
+                        ";
+                    }
+                ?>
+                
             </div>
         </div>
     </section>
+    <!-- Modale (popup) -->
+    <div id="reservationModal" class="modal fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden">
+        <div class="modal-content bg-white p-6 rounded-lg w-1/3">
+            <span class="close-btn text-right text-2xl cursor-pointer" onclick="closeModal()">&times;</span>
+            <h3 class="text-center text-2xl font-bold text-[#c9ab81]">Réservation</h3>
+            
+            <!-- Formulaire de réservation -->
+            <form action="addR.php" method="POST">
+                <input type="hidden" id="menu_id" name="menu_id">
+                <input type="hidden" id="user_id" name="user_id" value="<?php echo $userId; ?>">
+
+                <div class="flex flex-col gap-4">
+                    <label for="date">Date de réservation :</label>
+                    <input type="date" id="date" name="date" required class="p-2 border rounded">
+
+                    <label for="time">Heure de réservation :</label>
+                    <input type="time" id="time" name="time" required class="p-2 border rounded">
+
+                    <label for="num_people">Nombre de personnes :</label>
+                    <input type="number" id="num_people" name="nbrP" min="1" required class="p-2 border rounded">
+
+                    <label for="address">Adresse :</label>
+                    <textarea id="address" name="address" required class="p-2 border rounded"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-4 mt-4">
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                        Réserver
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <!-- Pied de page -->
     <footer class="bg-gray-800 text-white py-6">
@@ -164,46 +227,6 @@
         </div>
     </footer>
 
-    <script>
-
-document.querySelectorAll('.carousel').forEach(carousel => {
-        const inner = carousel.querySelector('.carousel-inner');
-        const leftBtn = carousel.querySelector('.carousel-btn.left');
-        const rightBtn = carousel.querySelector('.carousel-btn.right');
-        let index = 0;
-
-        // Fonction pour mettre à jour le défilement
-        function updateCarousel() {
-            const offset = -index * 100;
-            inner.style.transform = `translateX(${offset}%)`;
-        }
-
-        // Bouton gauche
-        leftBtn.addEventListener('click', () => {
-            index = (index > 0) ? index - 1 : inner.children.length - 1;
-            updateCarousel();
-        });
-
-        // Bouton droit
-        rightBtn.addEventListener('click', () => {
-            index = (index < inner.children.length - 1) ? index + 1 : 0;
-            updateCarousel();
-        });
-    });
-        const cards = document.querySelectorAll('.card');
-
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('show');
-                }
-            });
-        });
-
-        cards.forEach(card => {
-            observer.observe(card);
-        });
-
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
