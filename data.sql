@@ -1,12 +1,12 @@
 CREATE DATABASE restaurant;
 use restaurant;
-
+drop table user;
 CREATE TABLE user (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(55),
     email VARCHAR(55),
     password VARCHAR(255),
-    role VARCHAR(10)
+    role VARCHAR(10) DEFAULT 'user'
 );
 CREATE TABLE menu (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -19,6 +19,7 @@ CREATE TABLE plat (
     titre VARCHAR(55),
     categorie VARCHAR(55)
 );
+drop table reservation ;
 CREATE TABLE reservation (
     id INT AUTO_INCREMENT PRIMARY KEY,
     date_reservation DATE,
@@ -38,3 +39,9 @@ Create TABLE menuPlat (
     FOREIGN KEY(id_plat) REFERENCES plat(id)
 
 );
+
+ALTER TABLE plat
+ADD COLUMN image varchar(25) NOT NULL;
+
+
+ALTER TABLE plat MODIFY image VARCHAR(255) NULL;
