@@ -1,16 +1,30 @@
 <?php
-    include "connection.php";
-    session_start();
-    if(isset($_SESSION['id_Login']))
-    {
-        if($_SESSION['role'] == 'user'){
-            header('Location: index.php');
-            exit(); 
-        }
-        } else {
-            header('Location: login.php');
-        }
+include "connection.php";
+// session_start();
+
+// if (isset($_SESSION['id_Login'])) {
+//     if ($_SESSION['role'] == 'user') {
+//         header('Location: index.php');
+//         exit();
+//     }
+// } else {
+//     header('Location: login.php');
+//     exit();
+// }
+
+// Requête pour récupérer les réservations
+$sql = "SELECT 
+            u.nom AS nom_client,
+            r.date_reservation,
+            r.heure_reservation,
+            r.nbr_personnes,
+            r.id as id_reservation
+        FROM reservation r
+        INNER JOIN user u ON r.id_client = u.id";
+
+    $result = $conn->query($sql);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,8 +54,8 @@
 <div class="flex min-h-screen">
     <!-- Sidebar -->
     <aside class="w-52 bg-gray-800 border-r border-gray-700 min-h-full flex flex-col items-center gap-4 py-6">
-    <h1 class="text-2xl font-bold text-white">Chef<span class="text-[#c9ab81]">Gourmet</span></h1>
-    <nav class="mt-6 space-y-4">
+        <h1 class="text-2xl font-bold text-white">Chef<span class="text-[#c9ab81]">Gourmet</span></h1>
+        <nav class="mt-6 space-y-4">
             <a href="#" class="flex gap-4 px-4 py-2 rounded-2xl text-gray-300 hover:bg-gray-700"><i class="fa fa-home"></i> Dashboard</a>
             <a href="#" class="flex gap-4 px-4 py-2 rounded-2xl text-gray-300 hover:bg-gray-700"><i class="fa fa-calendar-check"></i> Réservations</a>
             <a href="#" class="flex gap-4 px-4 py-2 rounded-2xl text-gray-300 hover:bg-gray-700"><i class="fa fa-chart-bar"></i> Statistiques</a>
@@ -81,35 +95,28 @@
                         </tr>
                     </thead>
                     <tbody>
-                        
-                        <tr class="border-b border-gray-700">
-                            <td class="px-4 py-2 text-gray-400">Jean Dupont</td>
-                            <td class="px-4 py-2 text-gray-400">2024-12-20</td>
-                            <td class="px-4 py-2 text-gray-400">19:30</td>
-                            <td class="px-4 py-2 text-gray-400">4</td>
-                            <td class="px-3 py-2 flex gap-4 font-[10]">
-                                <button class="text-white text-xs px-4 py-2 rounded-lg border hover:border-transparent  hover:bg-btnAccept  bg-transparent border-green-700">
-                                    <i class="fa fa-check text-xs"></i> Accepter
-                                </button>
-                                <button class=" text-white text-xs px-4 py-2 rounded-lg  border hover:bg-btnRefuse bg-transparent  hover:border-transparent border-red-700">
-                                    <i class="fa fa-times text-xs"></i> Refuser
-                                </button>
-                            </td>
-                        </tr>
-                        <tr class="border-b border-gray-700">
-                            <td class="px-4 py-2 text-gray-400">Marie Curie</td>
-                            <td class="px-4 py-2 text-gray-400">2024-12-21</td>
-                            <td class="px-4 py-2 text-gray-400">20:00</td>
-                            <td class="px-4 py-2 text-gray-400">2</td>
-                            <td class="px-3 py-2 flex gap-4 font-[10]">
-                                <button class="text-white px-4 py-2 rounded-lg text-xs  border hover:border-transparent  hover:bg-btnAccept  bg-transparent border-green-700 ">
-                                    <i class="fa fa-check text-xs"></i> Accepter
-                                </button>
-                                <button class=" text-white px-4 text-xs py-2 rounded-lg border hover:bg-btnRefuse bg-transparent  hover:border-transparent border-red-700">
-                                    <i class="fa fa-times text-xs"></i> Refuser
-                                </button>
-                            </td>
-                        </tr>
+                        <?php if ($result->num_rows > 0): ?>
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                                <tr class="border-b border-gray-700">
+                                    <td class="px-4 py-2 text-gray-400"><?= htmlspecialchars($row['nom_client']); ?></td>
+                                    <td class="px-4 py-2 text-gray-400"><?= htmlspecialchars($row['date_reservation']); ?></td>
+                                    <td class="px-4 py-2 text-gray-400"><?= htmlspecialchars($row['heure_reservation']); ?></td>
+                                    <td class="px-4 py-2 text-gray-400"><?= htmlspecialchars($row['nbr_personnes']); ?></td>
+                                    <td class="px-3 py-2 flex gap-4">
+                                        <button class="text-white text-xs px-4 py-2 rounded-lg border hover:border-transparent hover:bg-btnAccept bg-transparent border-green-700">
+                                            <i class="fa fa-check text-xs"></i> Accepter
+                                        </button>
+                                        <button class="text-white text-xs px-4 py-2 rounded-lg border hover:bg-btnRefuse bg-transparent hover:border-transparent border-red-700">
+                                            <i class="fa fa-times text-xs"></i> Refuser
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" class="px-4 py-2 text-center text-gray-400">Aucune réservation trouvée.</td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
