@@ -16,6 +16,7 @@ $id_client = $_SESSION['id_Login'];
 
 // Requête SQL avec sous-requête
 $sql = "SELECT 
+        r.id,
         r.date_reservation,
         r.heure_reservation,
         r.nbr_personnes,
@@ -67,9 +68,22 @@ $result = $stmt->get_result();
 
                         <div class="flex justify-between mt-auto">
                             <!-- Bouton Modifier -->
-                            <a href="" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">Modifier</a>
-                            <!-- Bouton Annuler -->
-                            <a href="" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition" >Annuler</a>
+                            <button
+                            class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition" 
+                            onclick="openEditModal(
+                                '<?= htmlspecialchars($row['id']); ?>', 
+                                '<?= htmlspecialchars($row['date_reservation']); ?>', 
+                                '<?= htmlspecialchars($row['heure_reservation']); ?>', 
+                                '<?= htmlspecialchars($row['nbr_personnes']); ?>', 
+                                '<?= htmlspecialchars($row['addresse_reservation']); ?>'
+                            )">
+                            Modifier
+                            </button>
+                             <!-- Bouton Annuler -->
+                              <form action="update_Status.php" method="post">
+                              <input type="hidden" name="reservation_idU" id="reservation_idU" value="<?= htmlspecialchars($row['id']); ?>">
+                              <button  class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition" >Annuler</button>
+                              </form>
                         </div>
                     </div>
                 <?php endwhile; ?>
@@ -78,5 +92,64 @@ $result = $stmt->get_result();
             <p class="text-center text-lg text-gray-600">Aucune réservation trouvée.</p>
         <?php endif; ?>
     </div>
+    <div id="editModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-96">
+            <h2 class="text-xl font-semibold mb-4">Modifier Réservation</h2>
+            <form id="editForm" action="update_reservation.php" method="POST">
+                <input type="hidden" name="reservation_id" id="reservation_id">
+            
+                <div class="mb-4">
+                    <label for="date_reservation" class="block font-medium">Date:</label>
+                    <input type="date" name="date_reservation" id="date_reservation" class="w-full border rounded-lg p-2">
+                </div>
+                <div class="mb-4">
+                    <label for="heure_reservation" class="block font-medium">Heure:</label>
+                    <input type="time" name="heure_reservation" id="heure_reservation" class="w-full border rounded-lg p-2">
+                </div>
+                <div class="mb-4">
+                    <label for="nbr_personnes" class="block font-medium">Nombre de personnes:</label>
+                    <input type="number" name="nbr_personnes" id="nbr_personnes" class="w-full border rounded-lg p-2">
+                </div>
+                <div class="mb-4">
+                    <label for="addresse_reservation" class="block font-medium">Adresse:</label>
+                    <input type="text" name="addresse_reservation" id="addresse_reservation" class="w-full border rounded-lg p-2">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="bg-gray-500 text-white py-2 px-4 rounded-lg" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function openEditModal(id, dateReservation, heureReservation, nbrPersonnes, addresseReservation) {
+            // Populate modal fields
+            document.getElementById("reservation_id").value = id;
+            document.getElementById("date_reservation").value = dateReservation;
+            document.getElementById("heure_reservation").value = heureReservation;
+            document.getElementById("nbr_personnes").value = nbrPersonnes;
+            document.getElementById("addresse_reservation").value = addresseReservation;
+
+            // Show the modal
+            document.getElementById("editModal").classList.remove("hidden");
+        }
+
+        function closeModal() {
+            document.getElementById("editModal").classList.add("hidden");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("editModal").addEventListener("click", (event) => {
+                if (event.target === document.getElementById("editModal")) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
 </body>
 </html>
